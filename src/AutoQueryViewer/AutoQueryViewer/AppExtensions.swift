@@ -23,7 +23,7 @@ extension AutoQueryMetadataResponse {
             var metaType = self.types.filter { $0.name == typeName }.first
             
             while metaType != nil {
-                metaType!.properties.map { ret.append($0) }
+                metaType!.properties.forEach { ret.append($0) }
                 
                 metaType = metaType!.inherits != nil
                     ? self.types.filter { $0.name == metaType!.inherits?.name }.first
@@ -52,7 +52,7 @@ extension MetadataType {
 
 extension AutoQueryService {
     func toAutoQueryViewerConfig() -> AutoQueryViewerConfig {
-        var to = AutoQueryViewerConfig()
+        let to = AutoQueryViewerConfig()
         to.serviceBaseUrl = self.serviceBaseUrl
         to.serviceName = self.serviceName
         to.serviceDescription = self.serviceDescription
@@ -73,14 +73,14 @@ extension AutoQueryService {
 extension UIView
 {
     var appData:AppData {
-        return (UIApplication.sharedApplication().delegate as AppDelegate).appData
+        return (UIApplication.sharedApplication().delegate as! AppDelegate).appData
     }
 }
 
 extension UIViewController
 {
     var appData:AppData {
-        return (UIApplication.sharedApplication().delegate as AppDelegate).appData
+        return (UIApplication.sharedApplication().delegate as! AppDelegate).appData
     }
     
     func addBrandImage(imageUrl:String?, action:Selector) -> UIImageView? {
@@ -88,12 +88,12 @@ extension UIViewController
             return nil
         }
 
-        var width = view.frame.width / 2
-        var imageView = UIImageView(frame: CGRect(x: self.view.frame.width - width, y: 0, width: width, height: 80))
+        let width = view.frame.width / 2
+        let imageView = UIImageView(frame: CGRect(x: self.view.frame.width - width, y: 0, width: width, height: 80))
         imageView.contentMode = UIViewContentMode.TopRight
         imageView.loadAsync(imageUrl, withSize:imageView.frame.size)
 
-        var btnBrand = UIButton(frame: CGRect(x: self.view.frame.width - 440, y: 0, width: 440, height: 80))
+        let btnBrand = UIButton(frame: CGRect(x: self.view.frame.width - 440, y: 0, width: 440, height: 80))
         btnBrand.addTarget(self, action: action, forControlEvents: UIControlEvents.TouchUpInside)
         
         view.insertSubview(imageView, belowSubview: view.subviews[1] as UIView) //add after backgroundImage
@@ -113,12 +113,12 @@ extension UIImageView {
         }
         
         return self.appData.loadImageAsync(url!)
-            .then(body: {(img:UIImage?) -> UIImage? in
+            .then { (img:UIImage?) -> UIImage? in
                 if img != nil {
                     self.image = img?.scaledInto(withSize)
                 }
                 return self.image
-            })
+            }
     }
 }
 
@@ -150,9 +150,9 @@ extension UIImage
         scaledSize.height = self.size.height * useRatio
         
         UIGraphicsBeginImageContextWithOptions(scaledSize, false, 0.0)
-        var scaledImageRect = CGRectMake(0.0, 0.0, scaledSize.width, scaledSize.height)
+        let scaledImageRect = CGRectMake(0.0, 0.0, scaledSize.width, scaledSize.height)
         self.drawInRect(scaledImageRect)
-        var scaledImage = UIGraphicsGetImageFromCurrentImageContext()
+        let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
         return scaledImage
@@ -172,18 +172,22 @@ extension String
         if self.count == 0 {
             return ""
         }
-        var url = splitOnFirst("://").last!
+        let url = splitOnFirst("://").last!
         return url.stringByTrimmingCharactersInSet(NSCharacterSet(charactersInString: "/"))
     }
 
     var titleCase:String {
         return String(self[0]).uppercaseString + self[1..<self.count]
     }
+    
+    var count:Int {
+        return self.characters.count
+    }
 }
 
 extension NSError {
     var responseStatus:ResponseStatus {
-        var status:ResponseStatus = self.convertUserInfo() ?? ResponseStatus()
+        let status:ResponseStatus = self.convertUserInfo() ?? ResponseStatus()
         if status.errorCode == nil {
             status.errorCode = self.code.toString()
         }
@@ -210,12 +214,12 @@ extension UIColor {
         var alpha: CGFloat = 1.0
         
         if rgba.hasPrefix("#") {
-            let index   = advance(rgba.startIndex, 1)
+            let index   = rgba.startIndex.advancedBy(1)
             let hex     = rgba.substringFromIndex(index)
             let scanner = NSScanner(string: hex)
             var hexValue: CUnsignedLongLong = 0
             if scanner.scanHexLongLong(&hexValue) {
-                switch (countElements(hex)) {
+                switch (hex.count) {
                 case 3:
                     red   = CGFloat((hexValue & 0xF00) >> 8)       / 15.0
                     green = CGFloat((hexValue & 0x0F0) >> 4)       / 15.0
@@ -235,20 +239,23 @@ extension UIColor {
                     blue  = CGFloat((hexValue & 0x0000FF00) >> 8)  / 255.0
                     alpha = CGFloat(hexValue & 0x000000FF)         / 255.0
                 default:
-                    print("Invalid RGB string, number of characters after '#' should be either 3, 4, 6 or 8")
+                    print("Invalid RGB string, number of characters after '#' should be either 3, 4, 6 or 8", terminator: "")
                 }
             } else {
-                println("Scan hex error")
+                print("Scan hex error")
             }
         } else {
-            print("Invalid RGB string, missing '#' as prefix")
+            print("Invalid RGB string, missing '#' as prefix", terminator: "")
         }
         self.init(red:red, green:green, blue:blue, alpha:alpha)
     }
     
     var isDark:Bool {
         let componentColors = CGColorGetComponents(self.CGColor)
-        let colorBrightness = ((componentColors[0] * 299) + (componentColors[1] * 587) + (componentColors[2] * 114)) / 1000
+        let r = (componentColors[0] * 299)
+        let g = (componentColors[1] * 587)
+        let b = (componentColors[2] * 114)
+        let colorBrightness = (r + g + b) / 1000
         return colorBrightness < 0.5
     }
     

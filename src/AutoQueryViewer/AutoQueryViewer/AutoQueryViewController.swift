@@ -55,19 +55,19 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     var searchUrl:String?
     
     @IBAction func search() {
-        if txtSearchField.text.trim().count == 0 || txtSearchType.text.trim().count == 0 || txtSearchText.text.trim().count == 0 {
+        if txtSearchField.text!.trim().count == 0 || txtSearchType.text!.trim().count == 0 || txtSearchText.text!.trim().count == 0 {
             return
         }
         
-        var client = JsonServiceClient(baseUrl: config.serviceBaseUrl!)
+        let client = JsonServiceClient(baseUrl: config.serviceBaseUrl!)
         
-        let field = createAutoQueryParam(txtSearchField.text, txtSearchType.text)
+        let field = createAutoQueryParam(txtSearchField.text!, txtSearchType.text!)
         if field == nil {
             return
         }
         
         searchUrl = "/json/reply/\(selectedOperation.request!)"
-                + "?\(field!.urlEncode()!)=\(txtSearchText.text.trim().urlEncode()!)"
+                + "?\(field!.urlEncode()!)=\(txtSearchText.text!.trim().urlEncode()!)"
 
         setMessage(nil)
         spinner.startAnimating()
@@ -75,7 +75,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         txtSearchText.clearsOnBeginEditing = false
         
         client.getDataAsync(searchUrl!)
-            .then(body:{ (r:NSData) -> AnyObject in
+            .then { (r:NSData) -> AnyObject in
                 self.spinner.stopAnimating()
 
                 let json = r.toUtf8String()!
@@ -89,12 +89,12 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
                     self.updateResults(map.getItem("Results") as? NSArray ?? NSArray())
                 }
                 return r
-            })
-            .catch(body:{ (e:NSError) -> Void in
+            }
+            .error { (e:NSError) -> Void in
                 self.spinner.stopAnimating()
                 self.setErrorMessage(e.responseStatus.message)
                 self.results = NSArray()
-            })
+            }
     }
     
     @IBAction func viewCsv() {
@@ -128,7 +128,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
             else {
                 setMessage("showing \(offset+1) - \(offset+results.count) of \(total) results:")
             }
-            saveDefaultSetting("searchText", txtSearchText.text)
+            saveDefaultSetting("searchText", value: txtSearchText.text!)
         }
     }
     
@@ -139,13 +139,13 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         for var row = 0; row<results.count; row++ {
             if let result = results[row] as? NSDictionary {
                 for var column = 0; column<resultProperties.count; column++ {
-                    var property = resultProperties[column]
+                    let property = resultProperties[column]
                     if let value: AnyObject = result.getItem(property.name!) {
-                        var string = "\(value)"
+                        let string = "\(value)"
                         let font = UIFont.systemFontOfSize(ViewerStyles.cellFontSize)
-                        var stringSize = (string as NSString).sizeWithAttributes([NSFontAttributeName: font])
+                        let stringSize = (string as NSString).sizeWithAttributes([NSFontAttributeName: font])
                         
-                        var columnWidth = columnWidths[column]
+                        let columnWidth = columnWidths[column]
                         if stringSize.width > columnWidth {
                             columnWidths[column] = stringSize.width
                         }
@@ -156,7 +156,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     }
     
     func setMessage(message:String?) {
-        var hasMessage = (message ?? "").count > 0
+        let hasMessage = (message ?? "").characters.count > 0
         
         lblMessage.textColor = messageColor
         lblMessage.text = hasMessage
@@ -208,14 +208,14 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         resultProperties = response.getProperties(resultType.name)
         loadStyle()
         
-        var from = response.getType(selectedOperation.from)
-        var fromFields = response.getProperties(from?.name).map { $0.name ?? "" }
+        let from = response.getType(selectedOperation.from)
+        let fromFields = response.getProperties(from?.name).map { $0.name ?? "" }
 
         txtSearchFieldPicker = TextPickerDelegate(textField:txtSearchField, options:fromFields)
         txtSearchFieldPicker.onSelected = { self.txtSearchType.becomeFirstResponder() }
         txtSearchField.inputView = txtSearchFieldPicker.pickerFields
 
-        var conventionNames = response.config?.implicitConventions.map { $0.name ?? "" } ?? [String]()
+        let conventionNames = response.config?.implicitConventions.map { $0.name ?? "" } ?? [String]()
         txtSearchTypePicker = TextPickerDelegate(textField:txtSearchType, options:conventionNames)
         txtSearchTypePicker.onSelected = { self.txtSearchText.becomeFirstResponder() }
         txtSearchType.inputView = txtSearchTypePicker.pickerFields
@@ -300,7 +300,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     func spreadView(aSpreadView:MDSpreadView, objectValueForRowAtIndexPath rowPath:MDIndexPath, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
     {
         if let result = results[rowPath.row] as? NSDictionary {
-            var property = resultProperties[columnPath.column]
+            let property = resultProperties[columnPath.column]
             if let value: AnyObject = result.getItem(property.name!) {
                 
                 if let str = value as? String {
@@ -311,13 +311,15 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
                     }
                 }
                 if let array = value as? NSArray {
-                    var str = array.componentsJoinedByString(", ")
+                    let str = array.componentsJoinedByString(", ")
                     return str
                 }
                 if let map = value as? NSDictionary {
                     parseJson("")
-                    var error:NSError?
-                    var jsonData = NSJSONSerialization.dataWithJSONObject(map, options: nil, error: &error)
+                    var jsonData: NSData?
+                    do {
+                        jsonData = try NSJSONSerialization.dataWithJSONObject(map, options: [])
+                    } catch {}
                     var json = jsonData?.toUtf8String()
                     json = json?.replace("\"", withString: "").replace("{", withString: "").replace("}", withString: "")
                     return json ?? ""
@@ -337,7 +339,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     
     func spreadView( aSpreadView:MDSpreadView, titleForHeaderInRowSection section:NSInteger, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
     {
-        var property = resultProperties[columnPath.column]
+        let property = resultProperties[columnPath.column]
         return property.name ?? ""
     }
     
@@ -372,7 +374,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         if columnWidths.count == 0 {
             return ViewerStyles.maxFieldWidth
         }
-        var columnWidth = columnWidths[indexPath.column] + (ViewerStyles.cellPadding * 2)
+        let columnWidth = columnWidths[indexPath.column] + (ViewerStyles.cellPadding * 2)
         return columnWidth < ViewerStyles.maxFieldWidth ? columnWidth : ViewerStyles.maxFieldWidth
     }
     
@@ -414,7 +416,7 @@ class TextPickerDelegate : NSObject, UIPickerViewDelegate, UIPickerViewDataSourc
         return options.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return options[row]
     }
     

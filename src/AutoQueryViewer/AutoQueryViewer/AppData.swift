@@ -38,12 +38,12 @@ public class AppData : NSObject
         return Promise<[String:UIImage?]> { (complete, reject) in
             for url in urls {
                 self.loadImageAsync(url)
-                    .then(body: { (img:UIImage?) -> Void in
+                    .then { (img:UIImage?) -> Void in
                         images[url] = img
                         if images.count == urls.count {
                             return complete(images)
                         }
-                    })
+                    }
             }
         }
     }
@@ -54,13 +54,13 @@ public class AppData : NSObject
         }
         
         return client.getDataAsync(url)
-            .then(body: { (data:NSData) -> UIImage? in
+            .then { (data:NSData) -> UIImage? in
                 if let image = UIImage(data:data) {
                     self.imageCache[url] = image
                     return image
                 }
                 return nil
-            })
+            }
     }
     
     /* KVO Observable helpers */
@@ -74,7 +74,7 @@ public class AppData : NSObject
     }
     
     public func observe(observer: NSObject, property:String) {
-        self.addObserver(observer, forKeyPath: property, options: .New | .Old, context: &ctx)
+        self.addObserver(observer, forKeyPath: property, options: [.New, .Old], context: &ctx)
         
         var properties = observedProperties[observer] ?? [String]()
         properties.append(property)

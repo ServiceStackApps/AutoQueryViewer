@@ -26,7 +26,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
     var selectedOperation:AutoQueryOperation?
 
     override func viewDidLoad() {
-        
+        NSLog("viewDidLoad")
         if let r = response {
             self.loadAutoQueryMetadataResponse(r)
         }
@@ -34,16 +34,16 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
             
             self.loadConfig(service!.toAutoQueryViewerConfig())
             
-            var client = JsonServiceClient(baseUrl: service!.serviceBaseUrl!)
+            let client = JsonServiceClient(baseUrl: service!.serviceBaseUrl!)
             client.getAsync(AutoQueryMetadata())
-                .then(body: { (r:AutoQueryMetadataResponse) -> AnyObject in
+                .then { r  -> AnyObject in
                     self.loadAutoQueryMetadataResponse(r)
                     return r
-                })
-                .catch(body: { (e:NSError) -> Void in
+                }
+                .error { (e:NSError) in
                     self.spinner.stopAnimating()
                     self.lblError.text = "host is unavailable"
-                })
+                }
         }
     }
     
@@ -101,9 +101,6 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
             }
         }
     }
-
-    @IBAction func unwindSegue(unwindSegue: UIStoryboardSegue) {
-    }
     
     override func prefersStatusBarHidden() -> Bool {
         return true
@@ -114,7 +111,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = self.tblView.dequeueReusableCellWithIdentifier("cellService") as? UITableViewCell
+        let cell = self.tblView.dequeueReusableCellWithIdentifier("cellService")
             ?? UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cellService")
         
         if let config = response?.config {
@@ -135,7 +132,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
         
         cell.imageView!.image = self.appData.imageCache["clearIcon"]
         if let iconUrl = opType?.getViewerAttrProperty("IconUrl")?.value {
-            var fullIconUrl = response?.config?.serviceBaseUrl?.combinePath(iconUrl)
+            let fullIconUrl = response?.config?.serviceBaseUrl?.combinePath(iconUrl)
             cell.imageView!.loadAsync(fullIconUrl, defaultImage:"clearIcon", withSize: CGSize(width: 50, height: 50))
         }
         
@@ -146,8 +143,11 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
         return 60
     }
     
+    @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {
+    }
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let selectedIndex = tblView.indexPathForSelectedRow() {
+        if let selectedIndex = tblView.indexPathForSelectedRow {
             tblView.deselectRowAtIndexPath(selectedIndex, animated: false)
 
             if let autoQueryVC = segue.destinationViewController as? AutoQueryViewController {
@@ -158,7 +158,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        var autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryViewController") as AutoQueryViewController
+        let autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryViewController") as! AutoQueryViewController
         self.addChildViewController(autoQueryVC)
         self.performSegueWithIdentifier("autoquerySegue", sender:self)
     }

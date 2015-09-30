@@ -48,7 +48,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
         self.lblError.text = ""
         
         autoQueryClient.getAsync(GetAutoQueryServices())
-            .then(body: { (r:GetAutoQueryServicesResponse) -> AnyObject in
+            .then { (r:GetAutoQueryServicesResponse) -> AnyObject in
                 self.spinner.stopAnimating()
                 self.tblView.hidden = false
                 
@@ -56,11 +56,11 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
                 self.services = r.results
                 self.tblView.reloadData()
                 return r
-            })
-            .catch(body: { (e:NSError) -> Void in
+            }
+            .error { (e:NSError) -> Void in
                 self.spinner.stopAnimating()
                 self.lblError.text = "Service Registry is unavailable"
-            })
+            }
     }
 
     override func prefersStatusBarHidden() -> Bool {
@@ -72,7 +72,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = self.tblView.dequeueReusableCellWithIdentifier("cellServices") as? UITableViewCell
+        let cell = self.tblView.dequeueReusableCellWithIdentifier("cellServices")
             ?? UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cellServices")
         
         cell.backgroundColor = UIColor.clearColor()
@@ -96,7 +96,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let selectedIndex = tblView.indexPathForSelectedRow() {
+        if let selectedIndex = tblView.indexPathForSelectedRow {
             tblView.deselectRowAtIndexPath(selectedIndex, animated: false)
         }
         
@@ -113,7 +113,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
     }
     
     func openAutoQueryServiceViewController() {
-        var autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryServiceViewController") as AutoQueryServiceViewController
+        let autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryServiceViewController") as! AutoQueryServiceViewController
         self.addChildViewController(autoQueryVC)
         self.performSegueWithIdentifier("servicesSegue", sender:self)
     }
@@ -129,27 +129,27 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
         
         txtUrl.resignFirstResponder()
         
-        if txtUrl.text.count >= 2 && !txtUrl.text.hasPrefix("http") {
+        if txtUrl.text!.count >= 2 && !txtUrl.text!.hasPrefix("http") {
             txtUrl.text = "http://\(txtUrl.text)"
         }
         
-        let url = NSURL(string: txtUrl.text)
+        let url = NSURL(string: txtUrl.text!)
         if url?.host != nil {
             
-            var client = JsonServiceClient(baseUrl: txtUrl.text!)
+            let client = JsonServiceClient(baseUrl: txtUrl.text!)
             client.getAsync(AutoQueryMetadata())
-                .then(body: { (r:AutoQueryMetadataResponse) -> AnyObject in
+                .then { (r:AutoQueryMetadataResponse) -> AnyObject in
                     self.spinner.stopAnimating()
                     self.tblView.hidden = false
                     
                     if r.config != nil && r.config?.serviceBaseUrl != nil {
-                        saveDefaultSetting("customUrl", self.txtUrl.text!)
+                        saveDefaultSetting("customUrl", value: self.txtUrl.text!)
                         self.selectedResponse = r
                         self.selectedService = nil
                         self.openAutoQueryServiceViewController()
                         
                         if r.config!.isPublic == true {
-                            var request = RegisterAutoQueryService()
+                            let request = RegisterAutoQueryService()
                             request.baseUrl = r.config!.serviceBaseUrl
                             self.autoQueryClient.postAsync(request)
                         }
@@ -159,11 +159,11 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
                     }
                     
                     return r
-                })
-                .catch(body: { (e:NSError) -> Void in
+                }
+                .error { (e:NSError) -> Void in
                     self.spinner.stopAnimating()
                     self.lblError.text = "Host is unavailable"
-                })
+                }
         }
         else {
             lblError.text = "Invalid Url"
