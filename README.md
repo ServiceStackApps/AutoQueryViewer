@@ -104,10 +104,10 @@ However all examples above take advantage of the customization options available
 
 The primary configuration options are available on the `AutoQueryViewerConfig` typed property when registering the `AutoQueryFeature` feature. To better illustrate what each of the options does we'll include the different AutoQueryFeature configurations of each of the above examples:
 
-### [TechStacks Configuration](https://github.com/ServiceStackApps/TechStacks/blob/2ff11fc8e2f187a108f0e8000dac5c17282d130f/src/TechStacks/TechStacks/AppHost.cs#L138)
+### [TechStacks Configuration](https://github.com/ServiceStackApps/TechStacks/blob/41fd7ab78aab58174deaa5353761c7033605f783/src/TechStacks/TechStacks/AppHost.cs#L137)
 
 ```csharp
-Plugins.Add(new AutoQueryFeature
+Plugins.Add(new AutoQueryMetadataFeature
 {
     MaxLimit = 200,
     AutoQueryViewerConfig =
@@ -125,10 +125,10 @@ Plugins.Add(new AutoQueryFeature
 });
 ```
 
-### [GitHubAutoQuery Configuration](https://github.com/ServiceStackApps/GitHubAutoQuery/blob/b10150df0b9096c4993ad2e67f8b8547e0dd8e95/src/GitHubAutoQuery/GitHubAutoQuery/AppHost.cs#L120)
+### [GitHubAutoQuery Configuration](https://github.com/ServiceStackApps/GitHubAutoQuery/blob/4407b2a0f23a4708188454c36a43682bf5ab2928/src/GitHubAutoQuery/GitHubAutoQuery/AppHost.cs#L117)
 
 ```csharp
-Plugins.Add(new AutoQueryFeature
+Plugins.Add(new AutoQueryMetadataFeature
 {
     LoadFromAssemblies = { typeof(QueryRepos).Assembly },
     MaxLimit = 200,
@@ -147,10 +147,10 @@ Plugins.Add(new AutoQueryFeature
 });
 ```
 
-### [StackApis Configuration](https://github.com/ServiceStackApps/StackApis/blob/533e14601669be3a89e66f7476a3e86d7ef476e6/src/StackApis/AppHost.cs#L36)
+### [StackApis Configuration](https://github.com/ServiceStackApps/StackApis/blob/7c6ca0aa985eac1e6411486f1ea7d1d91f96c877/src/StackApis/AppHost.cs#L35)
 
 ```csharp
-Plugins.Add(new AutoQueryFeature
+Plugins.Add(new AutoQueryMetadataFeature
 {
     MaxLimit = 100,
     AutoQueryViewerConfig =
