@@ -9,7 +9,7 @@
 import UIKit
 
 
-func fromA(asciiCode:Int) -> String {
+func fromA(_ asciiCode:Int) -> String {
     let s = "\(UnicodeScalar(asciiCode + 97))"
     return s
 }
@@ -22,20 +22,20 @@ class ExampleMDSpreadViewController: UIViewController, MDSpreadViewDataSource, M
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        for (var a = 0; a < 2; a++) {
+        for a in 0 ..< 2 {
             let rowSections = NSMutableArray()
             
-            for (var b = 0; b < 2; b++) {
+            for b in 0 ..< 2 {
                 let columnSections = NSMutableArray()
                 
-                for (var c = 0; c < 20; c++) {
+                for c in 0 ..< 20 {
                     let row = NSMutableDictionary()
                     
-                    for (var d = 0; d < 5; d++) {
+                    for d in 0 ..< 5 {
                         let string = NSMutableString(capacity: 10)
                         
-                        for (var e = 0; e < 2; e++) {
-                            string.appendString("\(fromA(Int(arc4random_uniform(26))))")
+                        for _ in 0 ..< 2 {
+                            string.append("\(fromA(Int(arc4random_uniform(26))))")
                         }
                         
                         row["column\(fromA(a))\(fromA(b))\(fromA(d))"] = string
@@ -43,13 +43,13 @@ class ExampleMDSpreadViewController: UIViewController, MDSpreadViewDataSource, M
                     
                     row["header\(fromA(a))\(fromA(b))"] = "\(c + 1)"
                     
-                    columnSections.addObject(row)
+                    columnSections.add(row)
                 }
                 
-                rowSections.addObject(columnSections)
+                rowSections.add(columnSections)
             }
             
-            data.addObject(rowSections)
+            data.add(rowSections)
         }
         
         let mdView = MDSpreadView(frame: CGRect(x: 20, y: 20, width: self.view.frame.width - 40, height: self.view.frame.height - 40))
@@ -63,87 +63,87 @@ class ExampleMDSpreadViewController: UIViewController, MDSpreadViewDataSource, M
         // Dispose of any resources that can be recreated.
     }
     
-    func numberOfRowSectionsInSpreadView(aSpreadView:MDSpreadView) -> NSInteger
+    func numberOfRowSections(in aSpreadView:MDSpreadView) -> NSInteger
     {
         return 1
     }
     
-    func numberOfColumnSectionsInSpreadView(aSpreadView:MDSpreadView) -> NSInteger
+    func numberOfColumnSections(in aSpreadView:MDSpreadView) -> NSInteger
     {
         return 1
     }
     
-    func spreadView(aSpreadView:MDSpreadView, numberOfRowsInSection:NSInteger) -> NSInteger
+    func spreadView(_ aSpreadView:MDSpreadView, numberOfRowsInSection:NSInteger) -> NSInteger
     {
         return 20
     }
     
-    func spreadView(aSpreadView:MDSpreadView, numberOfColumnsInSection:NSInteger) -> NSInteger
+    func spreadView(_ aSpreadView:MDSpreadView, numberOfColumnsInSection:NSInteger) -> NSInteger
     {
         return 5
     }
     
-    func spreadView(aSpreadView:MDSpreadView, objectValueForRowAtIndexPath rowPath:MDIndexPath, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, objectValueForRowAt rowPath:MDIndexPath, forColumnAt columnPath:MDIndexPath) -> Any
     {
         print("spreadView \(rowPath.section) \(columnPath.section)")
         
-        let o = data.objectAtIndex(rowPath.section) as! NSMutableArray
-        let c = o.objectAtIndex(columnPath.section) as! NSMutableArray
-        let d = c.objectAtIndex(rowPath.row) as! NSMutableDictionary
+        let o = data.object(at: rowPath.section) as! NSMutableArray
+        let c = o.object(at: columnPath.section) as! NSMutableArray
+        let d = c.object(at: rowPath.row) as! NSMutableDictionary
         
         let key = "column\(fromA(rowPath.section))\(fromA(columnPath.section))\(fromA(columnPath.column))"
-        return d.objectForKey(key)!
+        return d.object(forKey: key)! as AnyObject
     }
     
-    func spreadView(aSpreadView:MDSpreadView, titleForHeaderInColumnSection section:NSInteger, forRowAtIndexPath rowPath:MDIndexPath)  -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, titleForHeaderInColumnSection section:NSInteger, forRowAt rowPath:MDIndexPath)  -> Any
     {
         print("spreadView titleForHeader \(rowPath.section) \(section)")
         
-        let o = data.objectAtIndex(rowPath.section) as! NSMutableArray
-        let c = o.objectAtIndex(section) as! NSMutableArray
-        let d = c.objectAtIndex(rowPath.row) as! NSMutableDictionary
+        let o = data.object(at: rowPath.section) as! NSMutableArray
+        let c = o.object(at: section) as! NSMutableArray
+        let d = c.object(at: rowPath.row) as! NSMutableDictionary
         
         let key = "header\(fromA(rowPath.section))\(fromA(section))"
-        return d.objectForKey(key)!
+        return d.object(forKey: key)! as AnyObject
     }
     
-    func spreadView( aSpreadView:MDSpreadView, titleForHeaderInRowSection section:NSInteger, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
+    func spreadView( _ aSpreadView:MDSpreadView, titleForHeaderInRowSection section:NSInteger, forColumnAt columnPath:MDIndexPath) -> Any
     {
-        return "Column \(columnPath.column+1)"
+        return "Column \(columnPath.column+1)" as AnyObject
     }
     
-    func spreadView(aSpreadView:MDSpreadView, titleForHeaderInRowSection rowSection:NSInteger, forColumnSection columnSection:NSInteger) -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, titleForHeaderInRowSection rowSection:NSInteger, forColumnSection columnSection:NSInteger) -> Any
     {
-        return "•"
+        return "•" as AnyObject
     }
     
     /* Display Customization */
-    func spreadView(aSpreadView:MDSpreadView, heightForRowAtIndexPath indexPath:MDIndexPath) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowAt indexPath:MDIndexPath) -> CGFloat
     {
         return 20
     }
     
-    func spreadView(aSpreadView:MDSpreadView, heightForRowHeaderInSection rowSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowHeaderInSection rowSection:NSInteger) -> CGFloat
     {
         return 20
     }
     
-    func spreadView(aSpreadView:MDSpreadView, heightForRowFooterInSection rowSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowFooterInSection rowSection:NSInteger) -> CGFloat
     {
         return 0
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnAtIndexPath indexPath:MDIndexPath) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnAt indexPath:MDIndexPath) -> CGFloat
     {
         return 20
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnHeaderInSection columnSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnHeaderInSection columnSection:NSInteger) -> CGFloat
     {
         return 20
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnFooterInSection columnSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnFooterInSection columnSection:NSInteger) -> CGFloat
     {
         return 0
     }

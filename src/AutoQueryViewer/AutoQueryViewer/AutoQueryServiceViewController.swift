@@ -40,15 +40,15 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
                     self.loadAutoQueryMetadataResponse(r)
                     return r
                 }
-                .error { (e:NSError) in
+                .catch { e in
                     self.spinner.stopAnimating()
                     self.lblError.text = "host is unavailable"
                 }
         }
     }
     
-    func loadAutoQueryMetadataResponse(response:AutoQueryMetadataResponse) {
-        self.tblView.hidden = false
+    func loadAutoQueryMetadataResponse(_ response:AutoQueryMetadataResponse) {
+        self.tblView.isHidden = false
         self.spinner.stopAnimating()
 
         self.loadConfig(response.config!)
@@ -58,7 +58,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
         self.tblView.reloadData()
     }
     
-    func loadConfig(config:AutoQueryViewerConfig)
+    func loadConfig(_ config:AutoQueryViewerConfig)
     {
         lblTitle.text = config.serviceName
         txtDescription.text = config.serviceDescription
@@ -69,7 +69,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
             spinner.color = UIColor(rgba: textColor)
         }
         if let linkColor = config.linkColor {
-            btnBack.setTitleColor(UIColor(rgba: linkColor), forState: .Normal)
+            btnBack.setTitleColor(UIColor(rgba: linkColor), for: UIControlState())
         }
         if let backgroundColor = config.backgroundColor {
             view.backgroundColor = UIColor(rgba: backgroundColor)
@@ -79,7 +79,7 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
             if brandImageUrl.hasPrefix("/") {
                 brandImageUrl = config.serviceBaseUrl!.combinePath(brandImageUrl)
             }
-            self.addBrandImage(brandImageUrl, action: "btnBrandGo:")
+            self.addBrandImage(brandImageUrl, action: #selector(AutoQueryServiceViewController.btnBrandGo(_:)))
         }
         
         if var backgroundImageUrl = config.backgroundImageUrl {
@@ -93,26 +93,26 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
         }
     }
 
-    func btnBrandGo(sender:UIButton!) {
+    func btnBrandGo(_ sender:UIButton!) {
         let brandUrl = response?.config?.brandUrl
         if brandUrl != nil {
-            if let nsUrl = NSURL(string: brandUrl!) {
-                UIApplication.sharedApplication().openURL(nsUrl)
+            if let nsUrl = URL(string: brandUrl!) {
+                UIApplication.shared.openURL(nsUrl)
             }
         }
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
 
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return operations.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = self.tblView.dequeueReusableCellWithIdentifier("cellService")
-            ?? UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cellService")
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.tblView.dequeueReusableCell(withIdentifier: "cellService")
+            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "cellService")
         
         if let config = response?.config {
             if let bgColor = config.backgroundColor {
@@ -139,27 +139,27 @@ class AutoQueryServiceViewController: UIViewController, UITableViewDelegate, UIT
         return cell
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
     }
     
-    @IBAction func prepareForUnwind(segue: UIStoryboardSegue) {
+    @IBAction func prepareForUnwind(_ segue: UIStoryboardSegue) {
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let selectedIndex = tblView.indexPathForSelectedRow {
-            tblView.deselectRowAtIndexPath(selectedIndex, animated: false)
+            tblView.deselectRow(at: selectedIndex, animated: false)
 
-            if let autoQueryVC = segue.destinationViewController as? AutoQueryViewController {
+            if let autoQueryVC = segue.destination as? AutoQueryViewController {
                 autoQueryVC.selectedOperation = operations[selectedIndex.row]
                 autoQueryVC.response = response!
             }
         }
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryViewController") as! AutoQueryViewController
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let autoQueryVC = self.storyboard?.instantiateViewController(withIdentifier: "AutoQueryViewController") as! AutoQueryViewController
         self.addChildViewController(autoQueryVC)
-        self.performSegueWithIdentifier("autoquerySegue", sender:self)
+        self.performSegue(withIdentifier: "autoquerySegue", sender:self)
     }
 }

@@ -19,34 +19,34 @@ BaseUrl: http://autoqueryviewer.servicestack.net
 import Foundation;
 
 // @Route("/ping")
-public class Ping
+open class Ping
 {
     required public init(){}
 }
 
 // @Route("/services")
-public class GetAutoQueryServices : IReturn
+open class GetAutoQueryServices : IReturn
 {
     public typealias Return = GetAutoQueryServicesResponse
     
     required public init(){}
-    public var reload:Bool?
+    open var reload:Bool?
 }
 
 // @Route("/services/register")
-public class RegisterAutoQueryService : IReturn
+open class RegisterAutoQueryService : IReturn
 {
     public typealias Return = RegisterAutoQueryServiceResponse
     
     required public init(){}
-    public var baseUrl:String?
+    open var baseUrl:String?
 }
 
-public class Dummy
+open class Dummy
 {
     required public init(){}
-    public var autoQueryMetadata:AutoQueryMetadata?
-    public var autoQueryMetadataResponse:AutoQueryMetadataResponse?
+    open var autoQueryMetadata:AutoQueryMetadata?
+    open var autoQueryMetadataResponse:AutoQueryMetadataResponse?
 }
 
 // @Route("/auth")
@@ -54,330 +54,330 @@ public class Dummy
 // @Route("/authenticate")
 // @Route("/authenticate/{provider}")
 // @DataContract
-public class Authenticate : IReturn
+open class Authenticate : IReturn
 {
     public typealias Return = AuthenticateResponse
     
     required public init(){}
     // @DataMember(Order=1)
-    public var provider:String?
+    open var provider:String?
     
     // @DataMember(Order=2)
-    public var state:String?
+    open var state:String?
     
     // @DataMember(Order=3)
-    public var oauth_token:String?
+    open var oauth_token:String?
     
     // @DataMember(Order=4)
-    public var oauth_verifier:String?
+    open var oauth_verifier:String?
     
     // @DataMember(Order=5)
-    public var userName:String?
+    open var userName:String?
     
     // @DataMember(Order=6)
-    public var password:String?
+    open var password:String?
     
     // @DataMember(Order=7)
-    public var rememberMe:Bool?
+    open var rememberMe:Bool?
     
     // @DataMember(Order=8)
-    public var `continue`:String?
+    open var `continue`:String?
     
     // @DataMember(Order=9)
-    public var nonce:String?
+    open var nonce:String?
     
     // @DataMember(Order=10)
-    public var uri:String?
+    open var uri:String?
     
     // @DataMember(Order=11)
-    public var response:String?
+    open var response:String?
     
     // @DataMember(Order=12)
-    public var qop:String?
+    open var qop:String?
     
     // @DataMember(Order=13)
-    public var nc:String?
+    open var nc:String?
     
     // @DataMember(Order=14)
-    public var cnonce:String?
+    open var cnonce:String?
     
     // @DataMember(Order=15)
-    public var meta:[String:String] = [:]
+    open var meta:[String:String] = [:]
 }
 
 // @Route("/assignroles")
 // @DataContract
-public class AssignRoles : IReturn
+open class AssignRoles : IReturn
 {
     public typealias Return = AssignRolesResponse
     
     required public init(){}
     // @DataMember(Order=1)
-    public var userName:String?
+    open var userName:String?
     
     // @DataMember(Order=2)
-    public var permissions:[String] = []
+    open var permissions:[String] = []
     
     // @DataMember(Order=3)
-    public var roles:[String] = []
+    open var roles:[String] = []
 }
 
 // @Route("/unassignroles")
 // @DataContract
-public class UnAssignRoles : IReturn
+open class UnAssignRoles : IReturn
 {
     public typealias Return = UnAssignRolesResponse
     
     required public init(){}
     // @DataMember(Order=1)
-    public var userName:String?
+    open var userName:String?
     
     // @DataMember(Order=2)
-    public var permissions:[String] = []
+    open var permissions:[String] = []
     
     // @DataMember(Order=3)
-    public var roles:[String] = []
+    open var roles:[String] = []
 }
 
-public class GetAutoQueryServicesResponse
+open class GetAutoQueryServicesResponse
 {
     required public init(){}
-    public var results:[AutoQueryService] = []
-    public var responseStatus:ResponseStatus?
+    open var results:[AutoQueryService] = []
+    open var responseStatus:ResponseStatus?
 }
 
-public class RegisterAutoQueryServiceResponse
+open class RegisterAutoQueryServiceResponse
 {
     required public init(){}
-    public var result:AutoQueryService?
-    public var responseStatus:ResponseStatus?
+    open var result:AutoQueryService?
+    open var responseStatus:ResponseStatus?
 }
 
 // @DataContract
-public class AuthenticateResponse
+open class AuthenticateResponse
 {
     required public init(){}
     // @DataMember(Order=1)
-    public var userId:String?
+    open var userId:String?
     
     // @DataMember(Order=2)
-    public var sessionId:String?
+    open var sessionId:String?
     
     // @DataMember(Order=3)
-    public var userName:String?
+    open var userName:String?
     
     // @DataMember(Order=4)
-    public var displayName:String?
+    open var displayName:String?
     
     // @DataMember(Order=5)
-    public var referrerUrl:String?
+    open var referrerUrl:String?
     
     // @DataMember(Order=6)
-    public var responseStatus:ResponseStatus?
+    open var responseStatus:ResponseStatus?
     
     // @DataMember(Order=7)
-    public var meta:[String:String] = [:]
+    open var meta:[String:String] = [:]
 }
 
 // @DataContract
-public class AssignRolesResponse
+open class AssignRolesResponse
 {
     required public init(){}
     // @DataMember(Order=1)
-    public var allRoles:[String] = []
+    open var allRoles:[String] = []
     
     // @DataMember(Order=2)
-    public var allPermissions:[String] = []
+    open var allPermissions:[String] = []
     
     // @DataMember(Order=3)
-    public var responseStatus:ResponseStatus?
+    open var responseStatus:ResponseStatus?
 }
 
 // @DataContract
-public class UnAssignRolesResponse
+open class UnAssignRolesResponse
 {
     required public init(){}
     // @DataMember(Order=1)
-    public var allRoles:[String] = []
+    open var allRoles:[String] = []
     
     // @DataMember(Order=2)
-    public var allPermissions:[String] = []
+    open var allPermissions:[String] = []
     
     // @DataMember(Order=3)
-    public var responseStatus:ResponseStatus?
+    open var responseStatus:ResponseStatus?
 }
 
-public class AutoQueryService
+open class AutoQueryService
 {
     required public init(){}
-    public var id:Int?
-    public var serviceBaseUrl:String?
-    public var serviceName:String?
-    public var serviceDescription:String?
-    public var serviceIconUrl:String?
-    public var isPublic:Bool?
-    public var onlyShowAnnotatedServices:Bool?
-    public var implicitConventions:[Property] = []
-    public var defaultSearchField:String?
-    public var defaultSearchType:String?
-    public var defaultSearchText:String?
-    public var brandUrl:String?
-    public var brandImageUrl:String?
-    public var textColor:String?
-    public var linkColor:String?
-    public var backgroundColor:String?
-    public var backgroundImageUrl:String?
-    public var iconUrl:String?
-    public var ownerId:String?
-    public var created:NSDate?
-    public var createdBy:String?
-    public var lastModified:NSDate?
-    public var lastModifiedBy:String?
+    open var id:Int?
+    open var serviceBaseUrl:String?
+    open var serviceName:String?
+    open var serviceDescription:String?
+    open var serviceIconUrl:String?
+    open var isPublic:Bool?
+    open var onlyShowAnnotatedServices:Bool?
+    open var implicitConventions:[Property] = []
+    open var defaultSearchField:String?
+    open var defaultSearchType:String?
+    open var defaultSearchText:String?
+    open var brandUrl:String?
+    open var brandImageUrl:String?
+    open var textColor:String?
+    open var linkColor:String?
+    open var backgroundColor:String?
+    open var backgroundImageUrl:String?
+    open var iconUrl:String?
+    open var ownerId:String?
+    open var created:Date?
+    open var createdBy:String?
+    open var lastModified:Date?
+    open var lastModifiedBy:String?
 }
 
 // @Route("/autoquery/metadata")
-public class AutoQueryMetadata : IReturn
+open class AutoQueryMetadata : IReturn
 {
     public typealias Return = AutoQueryMetadataResponse
 
     required public init(){}
 }
 
-public class AutoQueryMetadataResponse
+open class AutoQueryMetadataResponse
 {
     required public init(){}
-    public var config:AutoQueryViewerConfig?
-    public var operations:[AutoQueryOperation] = []
-    public var types:[MetadataType] = []
-    public var responseStatus:ResponseStatus?
+    open var config:AutoQueryViewerConfig?
+    open var operations:[AutoQueryOperation] = []
+    open var types:[MetadataType] = []
+    open var responseStatus:ResponseStatus?
 }
 
 // @DataContract
-public class Property
+open class Property
 {
     required public init(){}
     // @DataMember
-    public var name:String?
+    open var name:String?
     
     // @DataMember
-    public var value:String?
+    open var value:String?
 }
 
-public class AutoQueryViewerConfig
+open class AutoQueryViewerConfig
 {
     required public init(){}
-    public var serviceBaseUrl:String?
-    public var serviceName:String?
-    public var serviceDescription:String?
-    public var serviceIconUrl:String?
-    public var isPublic:Bool?
-    public var onlyShowAnnotatedServices:Bool?
-    public var implicitConventions:[Property] = []
-    public var defaultSearchField:String?
-    public var defaultSearchType:String?
-    public var defaultSearchText:String?
-    public var brandUrl:String?
-    public var brandImageUrl:String?
-    public var textColor:String?
-    public var linkColor:String?
-    public var backgroundColor:String?
-    public var backgroundImageUrl:String?
-    public var iconUrl:String?
+    open var serviceBaseUrl:String?
+    open var serviceName:String?
+    open var serviceDescription:String?
+    open var serviceIconUrl:String?
+    open var isPublic:Bool?
+    open var onlyShowAnnotatedServices:Bool?
+    open var implicitConventions:[Property] = []
+    open var defaultSearchField:String?
+    open var defaultSearchType:String?
+    open var defaultSearchText:String?
+    open var brandUrl:String?
+    open var brandImageUrl:String?
+    open var textColor:String?
+    open var linkColor:String?
+    open var backgroundColor:String?
+    open var backgroundImageUrl:String?
+    open var iconUrl:String?
 }
 
-public class AutoQueryOperation
+open class AutoQueryOperation
 {
     required public init(){}
-    public var request:String?
-    public var from:String?
-    public var to:String?
+    open var request:String?
+    open var from:String?
+    open var to:String?
 }
 
-public class MetadataType
+open class MetadataType
 {
     required public init(){}
-    public var name:String?
-    public var namespace:String?
-    public var genericArgs:[String] = []
-    public var inherits:MetadataTypeName?
-    public var implements:[MetadataTypeName] = []
-    public var displayType:String?
-    public var Description:String?
-    public var returnVoidMarker:Bool?
-    public var isNested:Bool?
-    public var isEnum:Bool?
-    public var isInterface:Bool?
-    public var isAbstract:Bool?
-    public var returnMarkerTypeName:MetadataTypeName?
-    public var routes:[MetadataRoute] = []
-    public var dataContract:MetadataDataContract?
-    public var properties:[MetadataPropertyType] = []
-    public var attributes:[MetadataAttribute] = []
-    public var innerTypes:[MetadataTypeName] = []
-    public var enumNames:[String] = []
-    public var enumValues:[String] = []
+    open var name:String?
+    open var namespace:String?
+    open var genericArgs:[String] = []
+    open var inherits:MetadataTypeName?
+    open var implements:[MetadataTypeName] = []
+    open var displayType:String?
+    open var Description:String?
+    open var returnVoidMarker:Bool?
+    open var isNested:Bool?
+    open var isEnum:Bool?
+    open var isInterface:Bool?
+    open var isAbstract:Bool?
+    open var returnMarkerTypeName:MetadataTypeName?
+    open var routes:[MetadataRoute] = []
+    open var dataContract:MetadataDataContract?
+    open var properties:[MetadataPropertyType] = []
+    open var attributes:[MetadataAttribute] = []
+    open var innerTypes:[MetadataTypeName] = []
+    open var enumNames:[String] = []
+    open var enumValues:[String] = []
 }
 
-public class MetadataTypeName
+open class MetadataTypeName
 {
     required public init(){}
-    public var name:String?
-    public var namespace:String?
-    public var genericArgs:[String] = []
+    open var name:String?
+    open var namespace:String?
+    open var genericArgs:[String] = []
 }
 
-public class MetadataRoute
+open class MetadataRoute
 {
     required public init(){}
-    public var path:String?
-    public var verbs:String?
-    public var notes:String?
-    public var summary:String?
+    open var path:String?
+    open var verbs:String?
+    open var notes:String?
+    open var summary:String?
 }
 
-public class MetadataDataContract
+open class MetadataDataContract
 {
     required public init(){}
-    public var name:String?
-    public var namespace:String?
+    open var name:String?
+    open var namespace:String?
 }
 
-public class MetadataPropertyType
+open class MetadataPropertyType
 {
     required public init(){}
-    public var name:String?
-    public var type:String?
-    public var isValueType:Bool?
-    public var typeNamespace:String?
-    public var genericArgs:[String] = []
-    public var value:String?
-    public var Description:String?
-    public var dataMember:MetadataDataMember?
-    public var readOnly:Bool?
-    public var paramType:String?
-    public var displayType:String?
-    public var isRequired:Bool?
-    public var allowableValues:[String] = []
-    public var allowableMin:Int?
-    public var allowableMax:Int?
-    public var attributes:[MetadataAttribute] = []
+    open var name:String?
+    open var type:String?
+    open var isValueType:Bool?
+    open var typeNamespace:String?
+    open var genericArgs:[String] = []
+    open var value:String?
+    open var Description:String?
+    open var dataMember:MetadataDataMember?
+    open var readOnly:Bool?
+    open var paramType:String?
+    open var displayType:String?
+    open var isRequired:Bool?
+    open var allowableValues:[String] = []
+    open var allowableMin:Int?
+    open var allowableMax:Int?
+    open var attributes:[MetadataAttribute] = []
 }
 
-public class MetadataAttribute
+open class MetadataAttribute
 {
     required public init(){}
-    public var name:String?
-    public var constructorArgs:[MetadataPropertyType] = []
-    public var args:[MetadataPropertyType] = []
+    open var name:String?
+    open var constructorArgs:[MetadataPropertyType] = []
+    open var args:[MetadataPropertyType] = []
 }
 
-public class MetadataDataMember
+open class MetadataDataMember
 {
     required public init(){}
-    public var name:String?
-    public var order:Int?
-    public var isRequired:Bool?
-    public var emitDefaultValue:Bool?
+    open var name:String?
+    open var order:Int?
+    open var isRequired:Bool?
+    open var emitDefaultValue:Bool?
 }
 
 

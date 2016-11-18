@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class AppData : NSObject
+open class AppData : NSObject
 {
     var client = JsonServiceClient(baseUrl: "http://servicestack.net")
     
@@ -21,11 +21,11 @@ public class AppData : NSObject
 
     func loadDefaultImageCaches() {
         imageCache = [:]
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(858, 689), false, 0.0)
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: 858, height: 689), false, 0.0)
         imageCache["blankScreenshot"] = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(40, 40), false, 0.0)
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: 40, height: 40), false, 0.0)
         imageCache["clearIcon"] = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
@@ -33,7 +33,7 @@ public class AppData : NSObject
         imageCache["bg-alpha"] = UIImage(named: "bg-alpha")
     }
     
-    public func loadAllImagesAsync(urls:[String]) -> Promise<[String:UIImage?]> {
+    @discardableResult open func loadAllImagesAsync(_ urls:[String]) -> Promise<[String:UIImage?]> {
         var images = [String:UIImage?]()
         return Promise<[String:UIImage?]> { (complete, reject) in
             for url in urls {
@@ -48,13 +48,13 @@ public class AppData : NSObject
         }
     }
     
-    public func loadImageAsync(url:String) -> Promise<UIImage?> {
+    @discardableResult open func loadImageAsync(_ url:String) -> Promise<UIImage?> {
         if let image = imageCache[url] {
             return Promise<UIImage?> { (complete, reject) in complete(image) }
         }
         
         return client.getDataAsync(url)
-            .then { (data:NSData) -> UIImage? in
+            .then { (data:Data) -> UIImage? in
                 if let image = UIImage(data:data) {
                     self.imageCache[url] = image
                     return image
@@ -65,23 +65,23 @@ public class AppData : NSObject
     
     /* KVO Observable helpers */
     var observedProperties = [NSObject:[String]]()
-    var ctx:AnyObject = 1
+    var ctx:AnyObject = 1 as AnyObject
     
-    public func observe(observer: NSObject, properties:[String]) {
+    open func observe(_ observer: NSObject, properties:[String]) {
         for property in properties {
             self.observe(observer, property: property)
         }
     }
     
-    public func observe(observer: NSObject, property:String) {
-        self.addObserver(observer, forKeyPath: property, options: [.New, .Old], context: &ctx)
+    open func observe(_ observer: NSObject, property:String) {
+        self.addObserver(observer, forKeyPath: property, options: [.new, .old], context: &ctx)
         
         var properties = observedProperties[observer] ?? [String]()
         properties.append(property)
         observedProperties[observer] = properties
     }
     
-    public func unobserve(observer: NSObject) {
+    open func unobserve(_ observer: NSObject) {
         if let properties = observedProperties[observer] {
             for property in properties {
                 self.removeObserver(observer, forKeyPath: property, context: &ctx)
@@ -94,11 +94,11 @@ public class AppData : NSObject
     }
 }
 
-func saveDefaultSetting(key:String, value:String) {
-    NSUserDefaults.standardUserDefaults().setObject(value, forKey: key)
+func saveDefaultSetting(_ key:String, value:String) {
+    UserDefaults.standard.set(value, forKey: key)
 }
-func getDefaultSetting(key:String) -> String? {
-    return NSUserDefaults.standardUserDefaults().stringForKey(key)
+func getDefaultSetting(_ key:String) -> String? {
+    return UserDefaults.standard.string(forKey: key)
 }
 
 

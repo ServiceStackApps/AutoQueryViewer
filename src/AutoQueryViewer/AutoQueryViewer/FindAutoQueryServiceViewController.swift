@@ -24,7 +24,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
     var selectedService:AutoQueryService?
     var selectedResponse:AutoQueryMetadataResponse?
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         if response != nil {
             reloadData()
         }
@@ -33,7 +33,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         spinner.stopAnimating()
-        tblView.hidden = true
+        tblView.isHidden = true
         txtUrl.delegate = self
 
         txtUrl.text = getDefaultSetting("customUrl")
@@ -50,32 +50,32 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
         autoQueryClient.getAsync(GetAutoQueryServices())
             .then { (r:GetAutoQueryServicesResponse) -> AnyObject in
                 self.spinner.stopAnimating()
-                self.tblView.hidden = false
+                self.tblView.isHidden = false
                 
                 self.response = r
                 self.services = r.results
                 self.tblView.reloadData()
                 return r
             }
-            .error { (e:NSError) -> Void in
+            .catch { e in
                 self.spinner.stopAnimating()
                 self.lblError.text = "Service Registry is unavailable"
             }
     }
 
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return services.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = self.tblView.dequeueReusableCellWithIdentifier("cellServices")
-            ?? UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cellServices")
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.tblView.dequeueReusableCell(withIdentifier: "cellServices")
+            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "cellServices")
         
-        cell.backgroundColor = UIColor.clearColor()
+        cell.backgroundColor = UIColor.clear
         let op = services[indexPath.row]
         
         cell.textLabel?.text = op.serviceName
@@ -91,36 +91,36 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
         return cell
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let selectedIndex = tblView.indexPathForSelectedRow {
-            tblView.deselectRowAtIndexPath(selectedIndex, animated: false)
+            tblView.deselectRow(at: selectedIndex, animated: false)
         }
         
-        if let autoQueryVC = segue.destinationViewController as? AutoQueryServiceViewController {
+        if let autoQueryVC = segue.destination as? AutoQueryServiceViewController {
             autoQueryVC.service = selectedService
             autoQueryVC.response = selectedResponse
         }
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.selectedService = services[indexPath.row]
         self.selectedResponse = nil
         self.openAutoQueryServiceViewController()
     }
     
     func openAutoQueryServiceViewController() {
-        let autoQueryVC = self.storyboard?.instantiateViewControllerWithIdentifier("AutoQueryServiceViewController") as! AutoQueryServiceViewController
+        let autoQueryVC = self.storyboard?.instantiateViewController(withIdentifier: "AutoQueryServiceViewController") as! AutoQueryServiceViewController
         self.addChildViewController(autoQueryVC)
-        self.performSegueWithIdentifier("servicesSegue", sender:self)
+        self.performSegue(withIdentifier: "servicesSegue", sender:self)
     }
     
     /* Custom Url */
     
-    func textFieldShouldReturn(textField:UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField:UITextField) -> Bool {
         connect()
         return true
     }
@@ -133,14 +133,14 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
             txtUrl.text = "http://\(txtUrl.text)"
         }
         
-        let url = NSURL(string: txtUrl.text!)
+        let url = URL(string: txtUrl.text!)
         if url?.host != nil {
             
             let client = JsonServiceClient(baseUrl: txtUrl.text!)
             client.getAsync(AutoQueryMetadata())
                 .then { (r:AutoQueryMetadataResponse) -> AnyObject in
                     self.spinner.stopAnimating()
-                    self.tblView.hidden = false
+                    self.tblView.isHidden = false
                     
                     if r.config != nil && r.config?.serviceBaseUrl != nil {
                         saveDefaultSetting("customUrl", value: self.txtUrl.text!)
@@ -160,7 +160,7 @@ class FindAutoQueryServiceViewController: UIViewController, UITableViewDelegate,
                     
                     return r
                 }
-                .error { (e:NSError) -> Void in
+                .catch { e in
                     self.spinner.stopAnimating()
                     self.lblError.text = "Host is unavailable"
                 }

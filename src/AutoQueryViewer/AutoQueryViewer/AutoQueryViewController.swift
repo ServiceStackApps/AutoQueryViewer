@@ -49,8 +49,8 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     var opType:MetadataType!
     var resultType:MetadataType!
     var resultProperties = [MetadataPropertyType]()
-    var messageColor:UIColor = UIColor.blackColor()
-    var errorMessageColor = UIColor.redColor()
+    var messageColor:UIColor = UIColor.black
+    var errorMessageColor = UIColor.red
     var columnWidths = [CGFloat]()
     var searchUrl:String?
     
@@ -75,7 +75,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         txtSearchText.clearsOnBeginEditing = false
         
         client.getDataAsync(searchUrl!)
-            .then { (r:NSData) -> AnyObject in
+            .then { (r:Data) -> Any in
                 self.spinner.stopAnimating()
 
                 let json = r.toUtf8String()!
@@ -90,7 +90,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
                 }
                 return r
             }
-            .error { (e:NSError) -> Void in
+            .catch { e in
                 self.spinner.stopAnimating()
                 self.setErrorMessage(e.responseStatus.message)
                 self.results = NSArray()
@@ -99,13 +99,13 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
     
     @IBAction func viewCsv() {
         if searchUrl != nil {
-            if let absoluteUrl = NSURL(string:config.serviceBaseUrl!.combinePath(searchUrl!) + "&format=csv") {
-                UIApplication.sharedApplication().openURL(absoluteUrl)
+            if let absoluteUrl = URL(string:config.serviceBaseUrl!.combinePath(searchUrl!) + "&format=csv") {
+                UIApplication.shared.openURL(absoluteUrl)
             }
         }
     }
     
-    func updateResults(results:NSArray) {
+    func updateResults(_ results:NSArray) {
         
         calculateColumnWidths(results)
         self.results = results
@@ -113,14 +113,14 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         switch results.count {
         case 0:
             setMessage("this search returned no results")
-            mdView.hidden = true
-            btnViewCsv.hidden = true
+            mdView.isHidden = true
+            btnViewCsv.isHidden = true
         case 1:
-            mdView.hidden = false
+            mdView.isHidden = false
             mdView.reloadData()
             setMessage("showing 1 result:")
         default:
-            mdView.hidden = false
+            mdView.isHidden = false
             mdView.reloadData()
             if results.count == total {
                 setMessage("showing \(results.count) results:")
@@ -132,18 +132,18 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         }
     }
     
-    func calculateColumnWidths(results:NSArray) {
+    func calculateColumnWidths(_ results:NSArray) {
         columnWidths = resultProperties.map {
-            ($0.name! as NSString).sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(ViewerStyles.cellFontSize)]).width
+            ($0.name! as NSString).size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: ViewerStyles.cellFontSize)]).width
         }
-        for var row = 0; row<results.count; row++ {
+        for row in 0 ..< results.count {
             if let result = results[row] as? NSDictionary {
-                for var column = 0; column<resultProperties.count; column++ {
+                for column in 0 ..< resultProperties.count {
                     let property = resultProperties[column]
-                    if let value: AnyObject = result.getItem(property.name!) {
+                    if let value:Any = result.getItem(property.name!) {
                         let string = "\(value)"
-                        let font = UIFont.systemFontOfSize(ViewerStyles.cellFontSize)
-                        let stringSize = (string as NSString).sizeWithAttributes([NSFontAttributeName: font])
+                        let font = UIFont.systemFont(ofSize: ViewerStyles.cellFontSize)
+                        let stringSize = (string as NSString).size(attributes: [NSFontAttributeName: font])
                         
                         let columnWidth = columnWidths[column]
                         if stringSize.width > columnWidth {
@@ -155,7 +155,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         }
     }
     
-    func setMessage(message:String?) {
+    func setMessage(_ message:String?) {
         let hasMessage = (message ?? "").characters.count > 0
         
         lblMessage.textColor = messageColor
@@ -163,15 +163,15 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
             ? (opType.getViewerAttrProperty("Title")?.value ?? opType.name!) + " - " + message!
             : message
         
-        btnViewCsv.hidden = !hasMessage
+        btnViewCsv.isHidden = !hasMessage
     }
     
-    func setErrorMessage(message:String?) {
+    func setErrorMessage(_ message:String?) {
         lblMessage.textColor = errorMessageColor
         lblMessage.text = message
     }
     
-    func createAutoQueryParam(field:String, _ operand:String) -> String? {
+    func createAutoQueryParam(_ field:String, _ operand:String) -> String? {
         if let template = response.getQueryTypeTemplate(operand) {
             let mergedField = template.replace("%", withString:field)
             return mergedField
@@ -179,7 +179,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         return nil
     }
 
-    func textFieldShouldReturn(textField:UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField:UITextField) -> Bool {
         if textField == txtSearchText {
             search()
             return true
@@ -187,7 +187,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         return false
     }
     
-    func textFieldShouldBeginEditing(textField:UITextField) -> Bool {
+    func textFieldShouldBeginEditing(_ textField:UITextField) -> Bool {
         return textField == txtSearchText
     }
     
@@ -197,10 +197,10 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         txtSearchText.delegate = self
         
         mdView = MDSpreadView(frame: CGRect(x: 0, y: 80, width: self.view.frame.width, height: self.view.frame.height - 80))
-        mdView.backgroundColor = UIColor.clearColor()
+        mdView.backgroundColor = UIColor.clear
         mdView.dataSource = self
         mdView.delegate = self
-        mdView.hidden = true
+        mdView.isHidden = true
         self.view.addSubview(mdView)
         
         opType = response.getType(selectedOperation.request)!
@@ -238,15 +238,15 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
             spinner.color = messageColor
         }
         if let linkColor = opType.getViewerAttrProperty("LinkColor")?.value ?? config.linkColor {
-            btnBack.setTitleColor(UIColor(rgba: linkColor), forState: .Normal)
-            btnSearch.setTitleColor(UIColor(rgba: linkColor), forState: .Normal)
-            btnViewCsv.setTitleColor(UIColor(rgba: linkColor), forState: .Normal)
+            btnBack.setTitleColor(UIColor(rgba: linkColor), for: UIControlState())
+            btnSearch.setTitleColor(UIColor(rgba: linkColor), for: UIControlState())
+            btnViewCsv.setTitleColor(UIColor(rgba: linkColor), for: UIControlState())
         }
         if var brandImageUrl = opType.getViewerAttrProperty("BrandImageUrl")?.value ?? config.brandImageUrl {
             if brandImageUrl.hasPrefix("/") {
                 brandImageUrl = config.serviceBaseUrl!.combinePath(brandImageUrl)
             }
-            self.addBrandImage(brandImageUrl, action: "btnBrandGo:")
+            self.addBrandImage(brandImageUrl, action: #selector(AutoQueryViewController.btnBrandGo(_:)))
         }
         
         if var backgroundImageUrl = opType.getViewerAttrProperty("BackgroundImageUrl")?.value ?? config.backgroundImageUrl {
@@ -260,65 +260,64 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         }
     }
     
-    func btnBrandGo(sender:UIButton!) {
+    func btnBrandGo(_ sender:UIButton!) {
         let brandUrl = opType.getViewerAttrProperty("brandUrl")?.value ?? config.brandUrl
         if brandUrl != nil {
-            if let nsUrl = NSURL(string: brandUrl!) {
-                UIApplication.sharedApplication().openURL(nsUrl)
+            if let nsUrl = URL(string: brandUrl!) {
+                UIApplication.shared.openURL(nsUrl)
             }
         }
     }
     
-    @IBAction func unwindSegue(unwindSegue: UIStoryboardSegue) {
+    @IBAction func unwindSegue(_ unwindSegue: UIStoryboardSegue) {
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
     /* MDSpreadView */
-    func numberOfRowSectionsInSpreadView(aSpreadView:MDSpreadView) -> NSInteger
+    func numberOfRowSections(in aSpreadView:MDSpreadView) -> NSInteger
     {
         return 1
     }
     
-    func numberOfColumnSectionsInSpreadView(aSpreadView:MDSpreadView) -> NSInteger
+    func numberOfColumnSections(in aSpreadView:MDSpreadView) -> NSInteger
     {
         return 1
     }
     
-    func spreadView(aSpreadView:MDSpreadView, numberOfRowsInSection:NSInteger) -> NSInteger
+    func spreadView(_ aSpreadView:MDSpreadView, numberOfRowsInSection:NSInteger) -> NSInteger
     {
         return results.count
     }
     
-    func spreadView(aSpreadView:MDSpreadView, numberOfColumnsInSection:NSInteger) -> NSInteger
+    func spreadView(_ aSpreadView:MDSpreadView, numberOfColumnsInSection:NSInteger) -> NSInteger
     {
         return resultProperties.count
     }
     
-    func spreadView(aSpreadView:MDSpreadView, objectValueForRowAtIndexPath rowPath:MDIndexPath, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, objectValueForRowAt rowPath:MDIndexPath, forColumnAt columnPath:MDIndexPath) -> Any
     {
         if let result = results[rowPath.row] as? NSDictionary {
             let property = resultProperties[columnPath.column]
-            if let value: AnyObject = result.getItem(property.name!) {
+            if let value = result.getItem(property.name!) {
                 
                 if let str = value as? String {
                     if str.hasPrefix("/Date(") {
-                        if let date = NSDate.fromString(str) {
+                        if let date = Date.fromString(str) {
                             return date.dateAndTimeString
                         }
                     }
                 }
                 if let array = value as? NSArray {
-                    let str = array.componentsJoinedByString(", ")
-                    return str
+                    let str = array.componentsJoined(by: ", ")
+                    return str as AnyObject
                 }
                 if let map = value as? NSDictionary {
-                    parseJson("")
-                    var jsonData: NSData?
+                    var jsonData: Data?
                     do {
-                        jsonData = try NSJSONSerialization.dataWithJSONObject(map, options: [])
+                        jsonData = try JSONSerialization.data(withJSONObject: map, options: [])
                     } catch {}
                     var json = jsonData?.toUtf8String()
                     json = json?.replace("\"", withString: "").replace("{", withString: "").replace("}", withString: "")
@@ -329,47 +328,47 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
             }
         }
         
-        return ""
+        return "" as AnyObject
     }
     
-    func spreadView(aSpreadView:MDSpreadView, titleForHeaderInColumnSection section:NSInteger, forRowAtIndexPath rowPath:MDIndexPath)  -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, titleForHeaderInColumnSection section:NSInteger, forRowAt rowPath:MDIndexPath)  -> Any
     {
-        return "\(rowPath.row + 1)"
+        return "\(rowPath.row + 1)" as AnyObject
     }
     
-    func spreadView( aSpreadView:MDSpreadView, titleForHeaderInRowSection section:NSInteger, forColumnAtIndexPath columnPath:MDIndexPath) -> AnyObject
+    func spreadView( _ aSpreadView:MDSpreadView, titleForHeaderInRowSection section:NSInteger, forColumnAt columnPath:MDIndexPath) -> Any
     {
         let property = resultProperties[columnPath.column]
-        return property.name ?? ""
+        return property.name as AnyObject? ?? "" as AnyObject
     }
     
-    func spreadView(aSpreadView:MDSpreadView, titleForHeaderInRowSection rowSection:NSInteger, forColumnSection columnSection:NSInteger) -> AnyObject
+    func spreadView(_ aSpreadView:MDSpreadView, titleForHeaderInRowSection rowSection:NSInteger, forColumnSection columnSection:NSInteger) -> Any
     {
-        return ""
+        return "" as AnyObject
     }
     
     /* Display Customization */
-    func spreadView(aSpreadView:MDSpreadView, heightForRowHeaderInSection rowSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowHeaderInSection rowSection:NSInteger) -> CGFloat
     {
         return ViewerStyles.rowHeaderHeight
     }
     
-    func spreadView(aSpreadView:MDSpreadView, heightForRowAtIndexPath indexPath:MDIndexPath) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowAt indexPath:MDIndexPath) -> CGFloat
     {
         return ViewerStyles.rowBodyHeight
     }
     
-    func spreadView(aSpreadView:MDSpreadView, heightForRowFooterInSection rowSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, heightForRowFooterInSection rowSection:NSInteger) -> CGFloat
     {
         return 0
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnHeaderInSection columnSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnHeaderInSection columnSection:NSInteger) -> CGFloat
     {
         return 50
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnAtIndexPath indexPath:MDIndexPath) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnAt indexPath:MDIndexPath) -> CGFloat
     {
         if columnWidths.count == 0 {
             return ViewerStyles.maxFieldWidth
@@ -378,7 +377,7 @@ class AutoQueryViewController: UIViewController, UITextFieldDelegate, MDSpreadVi
         return columnWidth < ViewerStyles.maxFieldWidth ? columnWidth : ViewerStyles.maxFieldWidth
     }
     
-    func spreadView(aSpreadView:MDSpreadView, widthForColumnFooterInSection columnSection:NSInteger) -> CGFloat
+    func spreadView(_ aSpreadView:MDSpreadView, widthForColumnFooterInSection columnSection:NSInteger) -> CGFloat
     {
         return 0
     }
@@ -404,23 +403,23 @@ class TextPickerDelegate : NSObject, UIPickerViewDelegate, UIPickerViewDataSourc
         pickerFields.dataSource = self
     }
     
-    func textFieldShouldEndEditing(textField:UITextField) -> Bool {
+    func textFieldShouldEndEditing(_ textField:UITextField) -> Bool {
         return options.filter { $0 == textField.text }.count > 0 || textField.text == ""
     }
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return options.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return options[row]
     }
     
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         textField.text = options[row]
         textField.resignFirstResponder()
         

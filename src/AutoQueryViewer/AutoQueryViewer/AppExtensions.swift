@@ -10,13 +10,13 @@ import Foundation
 
 extension AutoQueryMetadataResponse {
     
-    func getType(typeName:String?) -> MetadataType? {
+    func getType(_ typeName:String?) -> MetadataType? {
         return typeName != nil
             ? self.types.filter { $0.name == typeName! }.first
             : nil
     }
     
-    func getProperties(typeName:String?) -> [MetadataPropertyType] {
+    func getProperties(_ typeName:String?) -> [MetadataPropertyType] {
         var ret = [MetadataPropertyType]()
         
         if typeName != nil {
@@ -34,7 +34,7 @@ extension AutoQueryMetadataResponse {
         return ret
     }
     
-    func getQueryTypeTemplate(operand:String) -> String? {
+    func getQueryTypeTemplate(_ operand:String) -> String? {
         return self.config?.implicitConventions.filter { $0.name == operand }.map { $0.value ?? "" }.first
     }
 }
@@ -45,8 +45,8 @@ extension MetadataType {
         return self.attributes.filter { $0.name == "AutoQueryViewer" }.first
     }
     
-    func getViewerAttrProperty(name:String) -> MetadataPropertyType? {
-        return self.autoQueryViewerAttr?.args.filter { $0.name?.lowercaseString == name.lowercaseString }.first
+    func getViewerAttrProperty(_ name:String) -> MetadataPropertyType? {
+        return self.autoQueryViewerAttr?.args.filter { $0.name?.lowercased() == name.lowercased() }.first
     }
 }
 
@@ -73,28 +73,28 @@ extension AutoQueryService {
 extension UIView
 {
     var appData:AppData {
-        return (UIApplication.sharedApplication().delegate as! AppDelegate).appData
+        return (UIApplication.shared.delegate as! AppDelegate).appData
     }
 }
 
 extension UIViewController
 {
     var appData:AppData {
-        return (UIApplication.sharedApplication().delegate as! AppDelegate).appData
+        return (UIApplication.shared.delegate as! AppDelegate).appData
     }
     
-    func addBrandImage(imageUrl:String?, action:Selector) -> UIImageView? {
+    @discardableResult func addBrandImage(_ imageUrl:String?, action:Selector) -> UIImageView? {
         if imageUrl == nil {
             return nil
         }
 
         let width = view.frame.width / 2
         let imageView = UIImageView(frame: CGRect(x: self.view.frame.width - width, y: 0, width: width, height: 80))
-        imageView.contentMode = UIViewContentMode.TopRight
+        imageView.contentMode = UIViewContentMode.topRight
         imageView.loadAsync(imageUrl, withSize:imageView.frame.size)
 
         let btnBrand = UIButton(frame: CGRect(x: self.view.frame.width - 440, y: 0, width: 440, height: 80))
-        btnBrand.addTarget(self, action: action, forControlEvents: UIControlEvents.TouchUpInside)
+        btnBrand.addTarget(self, action: action, for: UIControlEvents.touchUpInside)
         
         view.insertSubview(imageView, belowSubview: view.subviews[1] as UIView) //add after backgroundImage
         view.insertSubview(btnBrand, belowSubview:imageView)
@@ -104,7 +104,7 @@ extension UIViewController
 }
 
 extension UIImageView {
-    func loadAsync(url:String?, defaultImage:String? = nil, withSize:CGSize? = nil) -> Promise<UIImage?> {
+    @discardableResult func loadAsync(_ url:String?, defaultImage:String? = nil, withSize:CGSize? = nil) -> Promise<UIImage?> {
 
         self.image = defaultImage != nil ? self.appData.imageCache[defaultImage!]?.scaledInto(withSize) : nil
 
@@ -124,7 +124,7 @@ extension UIImageView {
 
 extension CGFloat
 {
-    public func toHexColor(rgbValue:UInt32) -> UIColor {
+    public func toHexColor(_ rgbValue:UInt32) -> UIColor {
         let red = CGFloat((rgbValue & 0xFF0000) >> 16)/256.0
         let green = CGFloat((rgbValue & 0xFF00) >> 8)/256.0
         let blue = CGFloat(rgbValue & 0xFF)/256.0
@@ -135,7 +135,7 @@ extension CGFloat
 
 extension UIImage
 {
-    func scaledInto(bounds:CGSize?) -> UIImage {
+    func scaledInto(_ bounds:CGSize?) -> UIImage {
         if bounds == nil {
             return self
         }
@@ -150,18 +150,18 @@ extension UIImage
         scaledSize.height = self.size.height * useRatio
         
         UIGraphicsBeginImageContextWithOptions(scaledSize, false, 0.0)
-        let scaledImageRect = CGRectMake(0.0, 0.0, scaledSize.width, scaledSize.height)
-        self.drawInRect(scaledImageRect)
+        let scaledImageRect = CGRect(x: 0.0, y: 0.0, width: scaledSize.width, height: scaledSize.height)
+        self.draw(in: scaledImageRect)
         let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        return scaledImage
+        return scaledImage!
     }
 }
 
 extension UILabel
 {
-    func setFrame(x:CGFloat, y:CGFloat, width:CGFloat, height:CGFloat) {
+    func setFrame(_ x:CGFloat, y:CGFloat, width:CGFloat, height:CGFloat) {
         self.frame = self.frame
     }
 }
@@ -172,12 +172,12 @@ extension String
         if self.count == 0 {
             return ""
         }
-        let url = splitOnFirst("://").last!
-        return url.stringByTrimmingCharactersInSet(NSCharacterSet(charactersInString: "/"))
+        let url = splitOn(first:"://").last!
+        return url.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
     }
 
     var titleCase:String {
-        return String(self[0]).uppercaseString + self[1..<self.count]
+        return String(self[0]).uppercased() + self[1..<self.count]
     }
     
     var count:Int {
@@ -185,24 +185,11 @@ extension String
     }
 }
 
-extension NSError {
-    var responseStatus:ResponseStatus {
-        let status:ResponseStatus = self.convertUserInfo() ?? ResponseStatus()
-        if status.errorCode == nil {
-            status.errorCode = self.code.toString()
-        }
-        if status.message == nil {
-            status.message = self.localizedDescription
-        }
-        return status
-    }
-}
-
 extension NSDictionary
 {
-    func getItem(key:String) -> AnyObject? {
-        return self[String(key[0]).lowercaseString + key[1..<key.count]]
-            ?? self[String(key[0]).uppercaseString + key[1..<key.count]]
+    func getItem(_ key:String) -> Any? {
+        return self[String(key[0]).lowercased() + key[1..<key.count]]
+            ?? self[String(key[0]).uppercased() + key[1..<key.count]]
     }
 }
 
@@ -214,11 +201,11 @@ extension UIColor {
         var alpha: CGFloat = 1.0
         
         if rgba.hasPrefix("#") {
-            let index   = rgba.startIndex.advancedBy(1)
-            let hex     = rgba.substringFromIndex(index)
-            let scanner = NSScanner(string: hex)
+            let index   = rgba.characters.index(rgba.startIndex, offsetBy: 1)
+            let hex     = rgba.substring(from: index)
+            let scanner = Scanner(string: hex)
             var hexValue: CUnsignedLongLong = 0
-            if scanner.scanHexLongLong(&hexValue) {
+            if scanner.scanHexInt64(&hexValue) {
                 switch (hex.count) {
                 case 3:
                     red   = CGFloat((hexValue & 0xF00) >> 8)       / 15.0
@@ -251,10 +238,10 @@ extension UIColor {
     }
     
     var isDark:Bool {
-        let componentColors = CGColorGetComponents(self.CGColor)
-        let r = (componentColors[0] * 299)
-        let g = (componentColors[1] * 587)
-        let b = (componentColors[2] * 114)
+        let componentColors = self.cgColor.components
+        let r = ((componentColors?[0])! * 299)
+        let g = ((componentColors?[1])! * 587)
+        let b = ((componentColors?[2])! * 114)
         let colorBrightness = (r + g + b) / 1000
         return colorBrightness < 0.5
     }
